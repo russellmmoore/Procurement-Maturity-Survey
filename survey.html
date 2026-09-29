@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Maturity Assessment</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;min-height:100vh;padding:1rem}
+  .card{background:#fff;border-radius:16px;max-width:640px;margin:0 auto;padding:2rem;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+  .prog-wrap{height:4px;background:#e5e7eb;border-radius:2px;margin-bottom:2rem}
+  .prog-fill{height:4px;background:#2563eb;border-radius:2px;transition:width 0.4s ease}
+  .screen{display:none}.screen.active{display:block}
+  h1{font-size:1.5rem;font-weight:600;color:#111;margin-bottom:0.5rem}
+  .sub{font-size:0.875rem;color:#6b7280;line-height:1.6;margin-bottom:1.5rem}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+  .tag{font-size:0.75rem;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:20px;padding:3px 10px;color:#6b7280}
+  .cat-num{font-size:0.7rem;font-weight:600;color:#9ca3af;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .cat-title{font-size:1.3rem;font-weight:600;color:#111;margin-bottom:8px}
+  .cat-desc{font-size:0.875rem;color:#6b7280;line-height:1.6;margin-bottom:1.5rem}
+  .dots{text-align:center;margin-bottom:1.25rem}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e7eb;margin:0 2px;transition:background 0.2s}
+  .dot.done{background:#2563eb}
+  .options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem}
+  @media(max-width:480px){.options{grid-template-columns:1fr}}
+  .opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:1rem 0.75rem;cursor:pointer;background:#fff;text-align:center;transition:all 0.15s;width:100%}
+  .opt:hover{border-color:#93c5fd;background:#eff6ff}
+  .opt.sel{border:2px solid #2563eb;background:#eff6ff}
+  .opt-icon{font-size:1.5rem;margin-bottom:6px}
+  .opt-label{font-size:0.8125rem;font-weight:600;color:#111;display:block;margin-bottom:3px}
+  .opt-sub{font-size:0.6875rem;color:#6b7280;line-height:1.4}
+  .err{font-size:0.8125rem;color:#dc2626;margin-top:6px;min-height:18px}
+  .btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;gap:10px}
+  .btn{padding:10px 22px;border-radius:8px;font-size:0.875rem;font-weight:500;cursor:pointer;border:1.5px solid #d1d5db;background:#fff;color:#374151;transition:background 0.15s}
+  .btn:hover{background:#f9fafb}
+  .btn:disabled{opacity:0.4;cursor:not-allowed}
+  .btn-p{background:#2563eb;color:#fff;border-color:#2563eb}
+  .btn-p:hover{background:#1d4ed8}
+  .success-icon{font-size:3rem;margin-bottom:1rem}
+  .notice{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1rem;font-size:0.8125rem;color:#166534;margin-bottom:1.5rem}
+  .loading{text-align:center;padding:2rem;color:#9ca3af;font-size:0.875rem}
+  footer{text-align:center;font-size:0.75rem;color:#9ca3af;margin-top:1.5rem}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+  <!-- INTRO -->
+  <div class="screen active" id="s-intro">
+    <div style="font-size:2.25rem;margin-bottom:1rem">📋</div>
+    <h1>Procurement maturity assessment</h1>
+    <p class="sub">Rate your organization across 13 procurement categories. Choose the level that honestly describes where you are today — not where you aspire to be. Your response is anonymous; only the group average will be shown.</p>
+    <div class="tags">
+      <span class="tag">Stakeholder Partnering</span>
+      <span class="tag">Demand Management</span>
+      <span class="tag">Budget Alignment</span>
+      <span class="tag">Business Intake</span>
+      <span class="tag">Category Management</span>
+      <span class="tag">Sourcing</span>
+      <span class="tag">Contract Management</span>
+      <span class="tag">Supplier Management</span>
+      <span class="tag">Risk &amp; Resiliency</span>
+      <span class="tag">Sustainability &amp; Inclusion</span>
+      <span class="tag">Order to OK 2 Pay</span>
+      <span class="tag">Insights &amp; Analytics</span>
+      <span class="tag">Control &amp; Monitoring</span>
+    </div>
+    <button class="btn btn-p" onclick="startSurvey()" style="width:100%">Begin assessment →</button>
+    <footer>Takes approximately 5 minutes</footer>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="screen" id="s-q">
+    <div class="dots" id="dots"></div>
+    <div class="cat-num" id="q-num"></div>
+    <div class="cat-title" id="q-title"></div>
+    <div class="cat-desc" id="q-desc"></div>
+    <div class="options">
+      <button class="opt" id="rb-1" onclick="pick(1)">
+        <div class="opt-icon">🌱</div>
+        <span class="opt-label">Basic</span>
+        <span class="opt-sub">Ad hoc, reactive, limited process or ownership</span>
+      </button>
+      <button class="opt" id="rb-2" onclick="pick(2)">
+        <div class="opt-icon">⚙️</div>
+        <span class="opt-label">Intermediate</span>
+        <span class="opt-sub">Defined processes, partial adoption, some metrics in place</span>
+      </button>
+      <button class="opt" id="rb-3" onclick="pick(3)">
+        <div class="opt-icon">🏆</div>
+        <span class="opt-label">Advanced</span>
+        <span class="opt-sub">Proactive, data-driven, integrated and continuously improved</span>
+      </button>
+    </div>
+    <div class="err" id="q-err"></div>
+    <div class="btn-row">
+      <button class="btn" id="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn btn-p" onclick="goNext()">Next →</button>
+    </div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div class="screen" id="s-ty">
+    <div class="success-icon">✅</div>
+    <h1>Response submitted</h1>
+    <p class="sub">Thank you. Your ratings have been added to the group. The facilitator will share the group results on screen.</p>
+    <div class="notice">Your individual scores are not stored or shown — only the anonymous group average is visible to anyone.</div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="screen" id="s-err">
+    <div style="font-size:2rem;margin-bottom:1rem">⚠️</div>
+    <h1>Submission failed</h1>
+    <p class="sub">Something went wrong connecting to the results server. Please check that the SCRIPT_URL in this file is set correctly, then try again.</p>
+    <button class="btn btn-p" onclick="startSurvey()" style="margin-top:1rem">Try again</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIGURATION ──────────────────────────────────────────────────────────
+// Paste your Google Apps Script web app URL here after deploying:
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwOREbB7WHFc_0RDOy6qm3ROAePchJbTz_ENqHDiEgDiyaVm0_yWRh3ie4lqRSIYLNK/exec';
+// ──────────────────────────────────────────────────────────────────────────
+
+const CATS = [
+  {title:'Stakeholder Partnering',desc:'Assesses how well procurement collaborates with internal business stakeholders — from passive order-taking to trusted strategic advisor relationships with shared goals and regular engagement cadences.'},
+  {title:'Demand Management',desc:'Evaluates your ability to influence and shape what the business buys before it buys it — including demand forecasting, consolidation, specification rationalization, and challenge of non-essential spend.'},
+  {title:'Budget Alignment',desc:'Measures how effectively procurement is integrated into the financial planning cycle — from reactive spend tracking to proactive involvement in budget-setting, savings capture, and P&L linkage.'},
+  {title:'Business Intake',desc:'Reviews how clearly and consistently requests for procurement support are received, triaged, and routed — including intake tooling, SLAs, prioritization criteria, and self-service capabilities.'},
+  {title:'Category Management',desc:'Assesses the depth of market knowledge, strategic planning, and supplier positioning across spend categories — from transactional buying to fully segmented category strategies refreshed annually.'},
+  {title:'Sourcing',desc:'Evaluates the rigor and consistency of competitive sourcing events — including RFx quality, supplier selection methodology, negotiation planning, and coverage of addressable spend.'},
+  {title:'Contract Management',desc:'Measures the completeness of contract lifecycle practices — from template usage and obligation tracking to automated alerts, value delivery monitoring, and renewal planning.'},
+  {title:'Supplier Management',desc:'Reviews how suppliers are segmented, developed, and held accountable — from reactive issue resolution to structured performance scorecards, joint business plans, and innovation pipelines.'},
+  {title:'Risk & Resiliency',desc:'Assesses your visibility into and response to supply chain and supplier risk — including financial health monitoring, geographic concentration, business continuity planning, and disruption playbooks.'},
+  {title:'Sustainability & Inclusion',desc:'Evaluates how sustainability commitments and supplier diversity goals are embedded into procurement decisions — from policy statements to scored criteria, reporting, and verified outcomes.'},
+  {title:"Order to OK 2 Pay",desc:'Measures the efficiency and compliance of the procure-to-pay cycle — including PO coverage, invoice matching, touchless processing rates, payment terms, and resolution of invoice exceptions.'},
+  {title:'Insights & Analytics',desc:'Assesses the quality and accessibility of procurement data — from basic spend reports to real-time dashboards, predictive analytics, and data-driven decision-making embedded in daily operations.'},
+  {title:'Control & Monitoring',desc:'Evaluates the robustness of procurement governance — including policy compliance rates, maverick spend visibility, audit readiness, segregation of duties, and continuous control monitoring.'}
+];
+
+let cur = 0, ans = new Array(CATS.length).fill(0);
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function startSurvey(){cur=0;ans=new Array(CATS.length).fill(0);show('s-q');renderQ();}
+
+function renderDots(){
+  let h='';
+  for(let i=0;i<CATS.length;i++) h+=`<span class="dot${i<cur?' done':''}"></span>`;
+  document.getElementById('dots').innerHTML=h;
+}
+
+function renderQ(){
+  const c=CATS[cur];
+  document.getElementById('q-num').textContent=`Category ${cur+1} of ${CATS.length}`;
+  document.getElementById('q-title').textContent=c.title;
+  document.getElementById('q-desc').textContent=c.desc;
+  document.getElementById('q-err').textContent='';
+  document.getElementById('btn-back').disabled=cur===0;
+  [1,2,3].forEach(v=>document.getElementById('rb-'+v).classList.toggle('sel',ans[cur]===v));
+  document.getElementById('prog').style.width=((cur/CATS.length)*100)+'%';
+  renderDots();
+  window.scrollTo(0,0);
+}
+
+function pick(v){
+  ans[cur]=v;
+  [1,2,3].forEach(n=>document.getElementById('rb-'+n).classList.remove('sel'));
+  document.getElementById('rb-'+v).classList.add('sel');
+  document.getElementById('q-err').textContent='';
+}
+
+function goNext(){
+  if(!ans[cur]){document.getElementById('q-err').textContent='Please select a maturity level before continuing.';return;}
+  if(cur<CATS.length-1){cur++;renderQ();}
+  else submitSurvey();
+}
+
+function goBack(){if(cur>0){cur--;renderQ();}}
+
+async function submitSurvey(){
+  document.getElementById('prog').style.width='100%';
+  const payload={action:'submit',scores:ans};
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});
+    show('s-ty');
+  } catch(e){
+    show('s-err');
+  }
+}
+</script>
+</body>
+</html>
